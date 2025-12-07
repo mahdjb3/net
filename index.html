@@ -143,15 +143,20 @@ function addSubscriber() {
   const address = document.getElementById('address').value.trim();
   
   if (!name || !phone || isNaN(price) || !address) { 
-    alert("أدخل كل البيانات!"); 
+    alert("أدخل كل البيانات بشكل صحيح!"); 
     return; 
   }
   
   const sub = {name, phone, price, address, lastPay: null, paid: false};
-  const newRef = db.ref('subscribers').push();
-  newRef.set(sub);
-
-  clearInputs();
+  
+  // إضافة المشترك إلى Firebase مع التحقق من نجاح العملية
+  db.ref('subscribers').push(sub, error => {
+    if (error) {
+      alert("حصل خطأ أثناء الإضافة!");
+    } else {
+      clearInputs(); // امسح الحقول بعد نجاح الإضافة
+    }
+  });
 }
 
 // مسح الحقول بعد الإضافة
