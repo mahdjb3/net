@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>إدارة المشتركين</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+body {
+    font-family: 'Cairo', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    background: white;
+    padding: 30px 40px;
+    margin: 40px 0;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 900px;
+}
+
+h2 {
+    color: #4a00e0;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+input {
+    width: calc(50% - 12px);
+    padding: 12px;
+    margin: 6px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    border-color: #4a00e0;
+    box-shadow: 0 0 10px rgba(74,0,224,0.2);
+    outline: none;
+}
+
+button {
+    background: linear-gradient(45deg, #4a00e0, #8e2de2);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    margin: 10px 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.delayed { color: #e63946; font-weight: bold; }
+.paid { color: #2a9d8f; font-weight: bold; }
+
+ul { list-style: none; padding: 0; }
+li {
+    background: #f7f7f7;
+    margin: 10px 0;
+    padding: 12px 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+li:hover {
+    transform: translateY(-2px);
+}
+
+li span { margin-left: 10px; font-weight: bold; }
+#subsList button { margin: 0 5px; padding: 6px 10px; font-size: 0.9em; }
+
+#search { width: 100%; margin: 10px 0 20px 0; }
+
+@media (max-width: 600px) {
+    input { width: 100%; }
+    li { flex-direction: column; align-items: flex-start; }
+    #subsList button { margin-top: 5px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>إضافة مشترك</h2>
+<input id="name" placeholder="الاسم">
+<input id="phone" placeholder="رقم الهاتف">
+<input id="price" type="number" placeholder="السعر">
+<input id="address" placeholder="عنوان المنزل">
+<button onclick="addSubscriber()">إضافة</button>
+
+<h2>المشتركين</h2>
+<input id="search" placeholder="ابحث بالاسم..." onkeyup="searchSubs()">
+<ul id="subsList"></ul>
+<button onclick="exportToExcel()">تصدير إلى Excel</button>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDLQKdBN8lTmbu78gVhOeLWwdGyXYl6QdU",
+  authDomain: "subscribers-87829.firebaseapp.com",
+  projectId: "subscribers-87829",
+  storageBucket: "subscribers-87829.firebasestorage.app",
+  messagingSenderId: "81979628876",
+  appId: "1:81979628876:web:c1c521977ec8b1493643e9",
+  measurementId: "G-G4FB2Z9VQ8"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let subs = [];
+
+// إضافة مشترك جديد
+function addSubscriber() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const price = parseInt(document.getElementById('price').value);
+  const address = document.getElementById('address').value.trim();
+  
+  if (!name || !phone || isNaN(price) || !address) { 
+    alert("أدخل كل البيانات!"); 
+    return; 
+  }
+  
+  const sub = {name, phone, price, address, lastPay: null, paid: false};
+  const newRef = db.ref('subscribers').push();
+  newRef.set(sub);
+
+  clearInputs();
+}
+
+// مسح الحقول بعد الإضافة
+function clearInputs() {
+  document.getElementById('name').value = '';
+  document.getElementById('phone').value = '';
+  document.getElementById('price').value = '';
+  document.getElementById('address').value = '';
+}
+
+// البحث حسب الاسم
+function searchSubs() {
+  const query = document.getElementById('search').value.trim().toLowerCase();
+  renderSubs(query);
+}
+
+// **استمع للتغيرات في الوقت الحقيقي**
+db.ref('subscribers').on('value', snapshot => {
+  subs = [];
+  snapshot.forEach(child => {
+    const sub = child.val();
+    sub.id = child.key;
+    subs.push(sub);
+  });
+  renderSubs();
+});
+
+// عرض المشتركين
+function renderSubs(filter = "") {
+  const list = document.getElementById('subsList');
+  list.innerHTML = '';
+
+  // تحديث حالة الدفع لكل مشترك (متأخر بعد 30 يوم)
+  subs.forEach(s => {
+    if (s.lastPay) {
+      const diffDays = (Date.now() - s.lastPay)/(1000*60*60*24);
+      if (diffDays > 30) { s.paid = false; }
+    } else { s.paid = false; }
+  });
+
+  const sortedSubs = subs.slice().sort((a,b) => b.paid - a.paid);
+  const filteredSubs = sortedSubs.filter(s => s.name.toLowerCase().includes(filter));
+
+  filteredSubs.forEach((s, i) => {
+    const status = s.paid ? 'تم الدفع' : 'استحق الدفع';
+    const statusClass = s.paid ? 'paid' : 'delayed';
+    const lastPayDate = s.lastPay ? new Date(s.lastPay).toLocaleDateString('ar-EG') : '---';
+
+    const li = document.createElement('li');
+    li.innerHTML = `${s.name} - ${s.phone} - ${s.price} - ${s.address} - 
+      <span class="${statusClass}">${status}</span> - تاريخ الدفع: ${lastPayDate}
+      <button onclick="markPaid(${i})">تم الدفع</button>
+      <button onclick="deleteSub(${i})">حذف</button>`;
+    list.appendChild(li);
+  });
+}
+
+// تحديث حالة الدفع
+function markPaid(index){
+  const sub = subs[index];
+  sub.lastPay = Date.now();
+  sub.paid = true;
+  db.ref('subscribers/' + sub.id).update({ lastPay: sub.lastPay, paid: true });
+}
+
+// حذف مشترك
+function deleteSub(index){
+  const sub = subs[index];
+  if(confirm('هل أنت متأكد من حذف المشترك؟')){
+    db.ref('subscribers/' + sub.id).remove();
+  }
+}
+
+// تصدير البيانات إلى Excel
+function exportToExcel() {
+  if (subs.length === 0) {
+    alert("لا توجد بيانات لتصديرها!");
+    return;
+  }
+
+  const headers = ["الاسم", "رقم الهاتف", "السعر", "العنوان", "حالة الدفع", "تاريخ الدفع"];
+  const rows = subs.map(s => [
+    s.name,
+    s.phone,
+    s.price,
+    s.address,
+    s.paid ? "تم الدفع" : "استحق الدفع",
+    s.lastPay ? new Date(s.lastPay).toLocaleDateString('ar-EG') : "---"
+  ]);
+
+  const BOM = "\uFEFF";
+  let csvContent = BOM + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
+
+  const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "subscribers.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+</script>
+</body>
+</html>
