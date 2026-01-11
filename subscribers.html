@@ -7,19 +7,33 @@
 </head>
 <body>
 
-<h2>إدارة المشتركين</h2>
+<h2>إضافة مشترك</h2>
 
-<input id="name" placeholder="الاسم">
+<input id="name" placeholder="اسم المشترك">
 <input id="phone" placeholder="رقم الهاتف">
-<input id="price" type="number" placeholder="السعر">
-<input id="address" placeholder="العنوان">
+<input id="package" placeholder="الباقة">
+<input id="amount" type="number" placeholder="المبلغ">
 
-<button onclick="addSubscriber()">إضافة</button>
+<button type="button" onclick="addSubscriber()">إضافة</button>
 
-<ul id="list"></ul>
+<hr>
 
+<table border="1">
+  <thead>
+    <tr>
+      <th>الاسم</th>
+      <th>الهاتف</th>
+      <th>الباقة</th>
+      <th>المبلغ</th>
+    </tr>
+  </thead>
+  <tbody id="subsTable"></tbody>
+</table>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script src="assets/js/firebase.js"></script>
 <script src="assets/js/subscribers.js"></script>
 
