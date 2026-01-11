@@ -1,28 +1,26 @@
-const list = document.getElementById("list");
-
-db.ref("subscribers").on("value", snap => {
-    list.innerHTML = "";
-    snap.forEach(c => {
-        const s = c.val();
-        const li = document.createElement("li");
-        li.innerText = `${s.name} - ${s.phone} - ${s.price}`;
-        list.appendChild(li);
-    });
-});
-
 function addSubscriber() {
-    if (!name.value || !phone.value || !price.value || !address.value) {
-        alert("أدخل جميع البيانات");
-        return;
-    }
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const pack = document.getElementById("package").value.trim();
+  const amount = document.getElementById("amount").value.trim();
 
-    db.ref("subscribers").push({
-        name: name.value,
-        phone: phone.value,
-        price: price.value,
-        address: address.value,
-        paid: false
-    });
+  if (!name || !phone || !pack || !amount) {
+    alert("❌ يرجى تعبئة جميع الحقول");
+    return;
+  }
 
-    name.value = phone.value = price.value = address.value = "";
+  db.ref("subscribers").push({
+    name,
+    phone,
+    package: pack,
+    amount,
+    createdAt: Date.now()
+  });
+
+  alert("✅ تم إضافة المشترك");
+
+  document.getElementById("name").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("package").value = "";
+  document.getElementById("amount").value = "";
 }
