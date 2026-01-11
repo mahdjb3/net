@@ -2,32 +2,38 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>المشتركين</title>
+<title>المشتركين - FAST NET</title>
 <link rel="stylesheet" href="assets/css/style.css">
+<style>
+table { width: 90%; margin: 20px auto; border-collapse: collapse; }
+th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
+button { padding: 5px 10px; margin: 2px; }
+input { padding: 6px; margin: 4px; }
+</style>
 </head>
 <body>
 
-<h2>إضافة مشترك</h2>
+<h2 style="text-align:center;">إدارة المشتركين</h2>
 
-<input id="name" placeholder="اسم المشترك">
+<div style="text-align:center;">
+<input id="name" placeholder="الاسم">
 <input id="phone" placeholder="رقم الهاتف">
 <input id="package" placeholder="الباقة">
-<input id="amount" type="number" placeholder="المبلغ">
-
+<input id="price" type="number" placeholder="السعر">
 <button type="button" onclick="addSubscriber()">إضافة</button>
+</div>
 
-<hr>
-
-<table border="1">
-  <thead>
-    <tr>
-      <th>الاسم</th>
-      <th>الهاتف</th>
-      <th>الباقة</th>
-      <th>المبلغ</th>
-    </tr>
-  </thead>
-  <tbody id="subsTable"></tbody>
+<table>
+<thead>
+<tr>
+<th>الاسم</th>
+<th>الهاتف</th>
+<th>الباقة</th>
+<th>السعر</th>
+<th>العمليات</th>
+</tr>
+</thead>
+<tbody id="subsTable"></tbody>
 </table>
 
 <!-- Firebase -->
@@ -36,6 +42,5 @@
 
 <script src="assets/js/firebase.js"></script>
 <script src="assets/js/subscribers.js"></script>
-
 </body>
 </html>
