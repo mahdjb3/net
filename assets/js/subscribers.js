@@ -1,6 +1,4 @@
 // subscribers.js
-import { database } from './firebase.js';
-import { ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('addSubscriberForm');
@@ -11,30 +9,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render table from Firebase data
     function renderTable(subscribers) {
         tableBody.innerHTML = '';
-        Object.keys(subscribers || {}).forEach((key, index) => {
+        for (let key in subscribers) {
             const sub = subscribers[key];
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${index + 1}</td>
+                <td>${subscribers ? Object.keys(subscribers).indexOf(key) + 1 : 1}</td>
                 <td>${sub.name}</td>
                 <td>${sub.phone}</td>
                 <td><button class="deleteBtn" data-key="${key}">Delete</button></td>
             `;
             tableBody.appendChild(row);
-        });
+        }
 
-        // Attach delete handlers
+        // Delete button
         document.querySelectorAll('.deleteBtn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const key = e.target.dataset.key;
-                remove(ref(database, 'subscribers/' + key));
+                db.ref('subscribers/' + key).remove();
             });
         });
     }
 
-    // Listen to Firebase for changes
-    onValue(ref(database, 'subscribers'), (snapshot) => {
-        renderTable(snapshot.val());
+    // Listen to Firebase for real-time updates
+    db.ref('subscribers').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            renderTable(data);
+        } else {
+            tableBody.innerHTML = ''; // No subscribers
+        }
     });
 
     // Handle form submission
@@ -48,8 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const newSubscriberRef = push(ref(database, 'subscribers'));
-        set(newSubscriberRef, { name, phone });
+        // Push new subscriber to Firebase
+        const newSubRef = db.ref('subscribers').push();
+        newSubRef.set({ name, phone });
 
         form.reset();
     });
