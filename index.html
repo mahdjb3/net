@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>FAST NET - لوحة التحكم</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<h1>لوحة التحكم FAST NET</h1>
+
+<div class="stats">
+  <div>عدد المشتركين: <span id="totalSubs">0</span></div>
+  <div>مدفوع: <span id="paid">0</span></div>
+  <div>غير مدفوع: <span id="unpaid">0</span></div>
+</div>
+
+<nav>
+  <button onclick="location.href='subscribers.html'">المشتركين</button>
+  <button onclick="location.href='payments.html'">الدفع</button>
+  <button onclick="location.href='receipts.html'">الإيصالات</button>
+  <button onclick="logout()">تسجيل خروج</button>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="assets/js/firebase.js"></script>
+<script src="assets/js/dashboard.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+body {
+    font-family: Cairo, sans-serif;
+    background: #f2f2f2;
+    text-align: center;
+}
+
+input, button, select {
+    padding: 10px;
+    margin: 5px;
+}
+
+button {
+    background: #4a00e0;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
